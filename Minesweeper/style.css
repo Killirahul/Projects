@@ -1,0 +1,7 @@
+body { font-family: Arial, sans-serif; text-align: center; }
+#board { display: grid; grid-template-columns: repeat(5, 40px); grid-gap: 5px; margin: 20px auto; }
+.cell { width: 40px; height: 40px; background: #bbb; border: 1px solid #888; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.revealed { background: #eee; cursor: default; }
+.bomb { background: #e74c3c; color: #fff; }
+.win { color: green; font-weight: bold; }
+.lose { color: red; font-weight: bold; }
