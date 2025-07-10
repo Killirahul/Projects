@@ -1,9 +1,18 @@
+const readline = require('readline');
+
 const SIZE = 5;
 const BOMBS = 5;
+
 let board = Array.from({ length: SIZE }, () => Array(SIZE).fill('0'));
-let revealed = Array.from({ length: SIZE }, () => Array(SIZE).fill(false));
-let cellsRevealed = 0;
-let gameOver = false;
+let display = Array.from({ length: SIZE }, () => Array(SIZE).fill('*'));
+
+function initBoard() {
+    for (let i = 0; i < SIZE; i++) {
+        for (let j = 0; j < SIZE; j++) {
+            board[i][j] = '0';
+        }
+    }
+}
 
 function placeBombs() {
     let count = 0;
@@ -42,63 +51,66 @@ function calculateNumbers() {
     }
 }
 
-function revealCell(x, y) {
-    if (gameOver || revealed[x][y]) return;
-    revealed[x][y] = true;
-    const cell = document.getElementById(`cell-${x}-${y}`);
-    cell.classList.add('revealed');
-    if (board[x][y] === 'B') {
-        cell.textContent = '💣';
-        cell.classList.add('bomb');
-        document.getElementById('message').innerHTML = '<span class="lose">Boom! Game Over</span>';
-        gameOver = true;
-        revealAllBombs();
-        return;
-    } else {
-        cell.textContent = board[x][y] === '0' ? '' : board[x][y];
-        cellsRevealed++;
-        if (cellsRevealed === SIZE * SIZE - BOMBS) {
-            document.getElementById('message').innerHTML = '<span class="win">Congratulations! You win!</span>';
-            gameOver = true;
-        }
-    }
-}
-
-function revealAllBombs() {
+function showBoard() {
     for (let i = 0; i < SIZE; i++) {
+        let row = '';
         for (let j = 0; j < SIZE; j++) {
-            if (board[i][j] === 'B') {
-                const cell = document.getElementById(`cell-${i}-${j}`);
-                cell.textContent = '💣';
-                cell.classList.add('bomb', 'revealed');
-            }
+            row += display[i][j] + ' ';
         }
-    }
-}
-
-function createBoard() {
-    const boardDiv = document.getElementById('board');
-    boardDiv.innerHTML = '';
-    for (let i = 0; i < SIZE; i++) {
-        for (let j = 0; j < SIZE; j++) {
-            const cell = document.createElement('div');
-            cell.className = 'cell';
-            cell.id = `cell-${i}-${j}`;
-            cell.addEventListener('click', () => revealCell(i, j));
-            boardDiv.appendChild(cell);
-        }
+        console.log(row);
     }
 }
 
 function startGame() {
-    board = Array.from({ length: SIZE }, () => Array(SIZE).fill('0'));
-    revealed = Array.from({ length: SIZE }, () => Array(SIZE).fill(false));
-    cellsRevealed = 0;
-    gameOver = false;
-    document.getElementById('message').textContent = '';
+    initBoard();
     placeBombs();
     calculateNumbers();
-    createBoard();
+    for (let i = 0; i < SIZE; i++) {
+        for (let j = 0; j < SIZE; j++) {
+            display[i][j] = '*';
+        }
+    }
+    let revealed = 0;
+    const totalToReveal = SIZE * SIZE - BOMBS;
+    const rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout
+    });
+    function ask() {
+        showBoard();
+        rl.question('Enter x y: ', (answer) => {
+            let [x, y] = answer.split(' ').map(Number);
+            if (
+                isNaN(x) || isNaN(y) ||
+                x < 0 || x >= SIZE || y < 0 || y >= SIZE
+            ) {
+                console.log('Invalid coordinates. Try again.');
+                ask();
+                return;
+            }
+            if (display[x][y] !== '*') {
+                console.log('Cell already revealed. Try another.');
+                ask();
+                return;
+            }
+            if (board[x][y] === 'B') {
+                console.log('Boom! Game Over');
+                rl.close();
+                return;
+            } else {
+                display[x][y] = board[x][y];
+                revealed++;
+                if (revealed === totalToReveal) {
+                    console.log('Congratulations! You win!');
+                    showBoard();
+                    rl.close();
+                    return;
+                }
+                ask();
+            }
+        });
+    }
+    ask();
 }
 
-document.addEventListener('DOMContentLoaded', startGame);
+startGame();
