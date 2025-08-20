@@ -27,7 +27,7 @@ It has been implemented in:
 gcc matchmaker.c -o matchmaker
 ./matchmaker
 
-# 🎮 Minesweeper
+## 📌 2. Minesweeper
 
 A recreation of the classic **Minesweeper** puzzle game built in **multiple implementations**:  
 - 🌐 Web (HTML, CSS, JavaScript)  
